@@ -1,0 +1,73 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "zone-a",
+    "name": "Zone A (synthetic)"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       34.772,
+       32.074
+      ],
+      [
+       34.776,
+       32.074
+      ],
+      [
+       34.776,
+       32.08
+      ],
+      [
+       34.772,
+       32.08
+      ],
+      [
+       34.772,
+       32.074
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "zone-b",
+    "name": "Zone B (synthetic)"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       34.78,
+       32.062
+      ],
+      [
+       34.786,
+       32.062
+      ],
+      [
+       34.786,
+       32.068
+      ],
+      [
+       34.78,
+       32.068
+      ],
+      [
+       34.78,
+       32.062
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

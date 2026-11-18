@@ -1,0 +1,314 @@
+{
+ "version": 0.6,
+ "osm3s": {
+  "timestamp_osm_base": "2026-11-01T00:00:00Z",
+  "copyright": "Synthetic test fixture in OpenStreetMap JSON shape; not OpenStreetMap data."
+ },
+ "elements": [
+  {
+   "type": "node",
+   "id": 1,
+   "lat": 32.075,
+   "lon": 34.7741,
+   "tags": {
+    "amenity": "cafe",
+    "name": "Cafe Dizengoff"
+   }
+  },
+  {
+   "type": "node",
+   "id": 2,
+   "lat": 32.0779,
+   "lon": 34.775,
+   "tags": {
+    "amenity": "restaurant",
+    "name": "Square Bistro"
+   }
+  },
+  {
+   "type": "node",
+   "id": 3,
+   "lat": 32.082,
+   "lon": 34.777,
+   "tags": {
+    "amenity": "bar",
+    "name": "North Bar"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4,
+   "lat": 32.079,
+   "lon": 34.785,
+   "tags": {
+    "tourism": "hotel",
+    "name": "Far Hotel"
+   }
+  },
+  {
+   "type": "node",
+   "id": 5,
+   "lat": 32.09,
+   "lon": 34.774,
+   "tags": {
+    "amenity": "cafe",
+    "name": "Beyond End Cafe"
+   }
+  },
+  {
+   "type": "node",
+   "id": 6,
+   "lat": 32.076,
+   "lon": 34.7735,
+   "tags": {
+    "amenity": "cafe",
+    "name": "Dizengoff Kafe",
+    "name:he": "דיזנגוף קפה"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7,
+   "lat": 32.073,
+   "lon": 34.77,
+   "tags": {
+    "tourism": "museum",
+    "name": "Bauhaus Museum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8,
+   "lat": 32.064,
+   "lon": 34.774,
+   "tags": {
+    "amenity": "pharmacy",
+    "name": "Rothschild Pharmacy"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9,
+   "lat": 32.07,
+   "lon": 34.776,
+   "tags": {
+    "amenity": "cafe"
+   }
+  },
+  {
+   "type": "node",
+   "id": 501,
+   "lat": 32.0779,
+   "lon": 34.775,
+   "tags": {
+    "addr:street": "Dizengoff",
+    "addr:housenumber": "50"
+   }
+  },
+  {
+   "type": "node",
+   "id": 502,
+   "lat": 32.082,
+   "lon": 34.777,
+   "tags": {
+    "addr:street": "Dizengoff",
+    "addr:housenumber": "52"
+   }
+  },
+  {
+   "type": "way",
+   "id": 2000,
+   "nodes": [
+    1000,
+    1001,
+    1002
+   ],
+   "geometry": [
+    {
+     "lat": 32.07,
+     "lon": 34.77
+    },
+    {
+     "lat": 32.077,
+     "lon": 34.77
+    },
+    {
+     "lat": 32.084,
+     "lon": 34.77
+    }
+   ],
+   "tags": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "way",
+   "id": 2001,
+   "nodes": [
+    1010,
+    1011,
+    1012
+   ],
+   "geometry": [
+    {
+     "lat": 32.07,
+     "lon": 34.774
+    },
+    {
+     "lat": 32.077,
+     "lon": 34.774
+    },
+    {
+     "lat": 32.084,
+     "lon": 34.774
+    }
+   ],
+   "tags": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "way",
+   "id": 2002,
+   "nodes": [
+    1020,
+    1021,
+    1022
+   ],
+   "geometry": [
+    {
+     "lat": 32.07,
+     "lon": 34.778
+    },
+    {
+     "lat": 32.077,
+     "lon": 34.778
+    },
+    {
+     "lat": 32.084,
+     "lon": 34.778
+    }
+   ],
+   "tags": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "way",
+   "id": 2003,
+   "nodes": [
+    1000,
+    1010,
+    1020
+   ],
+   "geometry": [
+    {
+     "lat": 32.07,
+     "lon": 34.77
+    },
+    {
+     "lat": 32.07,
+     "lon": 34.774
+    },
+    {
+     "lat": 32.07,
+     "lon": 34.778
+    }
+   ],
+   "tags": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "way",
+   "id": 2004,
+   "nodes": [
+    1001,
+    1011,
+    1021
+   ],
+   "geometry": [
+    {
+     "lat": 32.077,
+     "lon": 34.77
+    },
+    {
+     "lat": 32.077,
+     "lon": 34.774
+    },
+    {
+     "lat": 32.077,
+     "lon": 34.778
+    }
+   ],
+   "tags": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "way",
+   "id": 2005,
+   "nodes": [
+    1002,
+    1012,
+    1022
+   ],
+   "geometry": [
+    {
+     "lat": 32.084,
+     "lon": 34.77
+    },
+    {
+     "lat": 32.084,
+     "lon": 34.774
+    },
+    {
+     "lat": 32.084,
+     "lon": 34.778
+    }
+   ],
+   "tags": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "relation",
+   "id": 100,
+   "members": [
+    {
+     "type": "way",
+     "ref": 3000,
+     "role": "outer",
+     "geometry": [
+      {
+       "lat": 32.06,
+       "lon": 34.765
+      },
+      {
+       "lat": 32.06,
+       "lon": 34.795
+      },
+      {
+       "lat": 32.09,
+       "lon": 34.795
+      },
+      {
+       "lat": 32.09,
+       "lon": 34.765
+      },
+      {
+       "lat": 32.06,
+       "lon": 34.765
+      }
+     ]
+    }
+   ],
+   "tags": {
+    "type": "boundary",
+    "boundary": "administrative",
+    "admin_level": "8",
+    "name": "Tel Aviv-Yafo (mini)"
+   }
+  }
+ ]
+}

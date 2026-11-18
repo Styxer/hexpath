@@ -1,0 +1,25 @@
+name: fetch-osm
+# Refreshes the committed OpenStreetMap extract. Data changes arrive as a PR,
+# so they are reviewed like code (governed change, no manual edits to data).
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e geo-pipeline
+      - run: python -m geopipeline fetch-osm --out data/osm/tel-aviv-center.json.gz
+      - run: ls -l data/osm/
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/osm-refresh
+          title: "data: refresh OpenStreetMap extract"
+          commit-message: "data: refresh OpenStreetMap extract (© OpenStreetMap contributors, ODbL)"
+          body: "Automated Overpass download of the coverage bbox. Review size and run the pipeline report before merging."

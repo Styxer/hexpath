@@ -1,10 +1,13 @@
-from datetime import datetime, timezone
+import json
 from pathlib import Path
 
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 COVERAGE = (34.765, 32.060, 34.795, 32.090)  # west, south, east, north
+MINI_OSM = REPO / "data" / "fixtures" / "mini" / "osm.json"
+MINI_ZONES = REPO / "data" / "fixtures" / "mini" / "zones.geojson"
+BAD_ZONES = REPO / "data" / "fixtures" / "bad" / "zones-wrong-extent.geojson"
 
 
 def load_golden():
@@ -16,17 +19,24 @@ def load_golden():
 
 
 @pytest.fixture
-def mini_dataset():
-    from geopipeline.model import Dataset, Place
+def mini_osm():
+    return json.loads(MINI_OSM.read_text(encoding="utf-8"))
 
-    places = (
-        Place("n1", "n1", "Cafe Dizengoff", None, None, "cafe", 34.7741, 32.0750, 0),
-        Place("n2", "n2", "Square Bistro", None, None, "restaurant", 34.7750, 32.0779, 0),
-        Place("n3", "n3", "North Bar", None, None, "bar", 34.7770, 32.0820, 0),
-    )
-    return Dataset(
-        source="test",
-        source_timestamp=datetime(2026, 11, 1, tzinfo=timezone.utc),
-        coverage=COVERAGE,
-        places=places, addresses=(), boundaries=(), nodes=(), edges=(), dropped={},
-    )
+
+@pytest.fixture
+def mini_zones():
+    return json.loads(MINI_ZONES.read_text(encoding="utf-8"))
+
+
+@pytest.fixture
+def mini_dataset(mini_osm, mini_zones):
+    from geopipeline.osm.transform import transform
+
+    return transform(mini_osm, mini_zones, COVERAGE)
+
+
+@pytest.fixture
+def bad_zones_dataset(mini_osm):
+    from geopipeline.osm.transform import transform
+
+    return transform(mini_osm, json.loads(BAD_ZONES.read_text()), COVERAGE)
