@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: hexpath-geo-service
+  datasource:
+    url: ${HEXPATH_DB_URL:jdbc:postgresql://localhost:55432/hexpath}
+    username: geo_reader
+    password: ${GEO_READER_PASSWORD:reader-dev}
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,dataset
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      expiry:
+        http.server.requests: 5m
+
+logging:
+  structured:
+    format:
+      console: ecs

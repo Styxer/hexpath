@@ -31,3 +31,32 @@ jobs:
         run: |
           python -m geopipeline export-seed --out shared/seed/seed.sql
           git diff --exit-code shared/seed/seed.sql
+  java:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ["21", "25"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+      - name: mvn verify (unit + Testcontainers integration tests)
+        run: mvn -B -ntp -f geo-service/pom.xml verify
+      - name: upload service jar
+        if: matrix.java == '21'
+        uses: actions/upload-artifact@v4
+        with:
+          name: geo-service-jar
+          path: geo-service/target/geo-service-*.jar
+      - name: upload test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-test-reports-${{ matrix.java }}
+          path: |
+            geo-service/target/surefire-reports/
+            geo-service/target/failsafe-reports/
