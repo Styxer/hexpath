@@ -37,7 +37,7 @@ public class PlaceRepository {
     }
 
     /** The statement for one combination of filters; exposed so the index guard test explains exactly this. */
-    static String searchSql(boolean text, boolean near, boolean category, boolean after) {
+    public static String searchSql(boolean text, boolean near, boolean category, boolean after) {
         String score = text ? SCORE : "0::float8";
         String distance = near ? DISTANCE : "0::float8";
         StringBuilder where = new StringBuilder("p.release_id = :release");

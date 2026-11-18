@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class H3CorridorSearch implements CorridorSearch {
 
-    static final String SQL = """
+    public static final String SQL = """
             WITH cand AS (
                 SELECT p.id, p.name, p.name_he, p.name_en, p.category, p.geom
                   FROM place p
@@ -48,7 +48,7 @@ public class H3CorridorSearch implements CorridorSearch {
         return "h3";
     }
 
-    static String cellsLiteral(java.util.Collection<Long> cells) {
+    public static String cellsLiteral(java.util.Collection<Long> cells) {
         return cells.stream().map(String::valueOf).collect(Collectors.joining(",", "{", "}"));
     }
 

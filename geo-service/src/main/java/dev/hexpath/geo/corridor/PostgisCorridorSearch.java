@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PostgisCorridorSearch implements CorridorSearch {
 
-    static final String SQL = """
+    public static final String SQL = """
             SELECT p.id, p.name, p.name_he, p.name_en, p.category, ST_Y(p.geom) AS lat, ST_X(p.geom) AS lon,
                    ST_Distance(p.geom::geography, ST_GeomFromText(:route, 4326)::geography) AS distance_m,
                    ST_LineLocatePoint(ST_GeomFromText(:route, 4326), p.geom)

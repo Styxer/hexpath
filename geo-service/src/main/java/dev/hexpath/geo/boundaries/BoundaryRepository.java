@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class BoundaryRepository {
 
-    static final String CONTAINING_SQL = """
+    public static final String CONTAINING_SQL = """
             SELECT b.id, b.name, b.type, b.origin
               FROM boundary b
              WHERE b.release_id = :release
