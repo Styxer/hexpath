@@ -5,6 +5,10 @@ spring:
     url: ${HEXPATH_DB_URL:jdbc:postgresql://localhost:55432/hexpath}
     username: geo_reader
     password: ${GEO_READER_PASSWORD:reader-dev}
+    hikari:
+      # Fuzzy place search uses pg_trgm's word similarity (operator <%). The extension default
+      # of 0.6 misses common Hebrew spelling variants (דיזינגוף vs דיזנגוף scores 0.545).
+      connection-init-sql: SET pg_trgm.word_similarity_threshold = ${hexpath.search.word-similarity-threshold}
   jackson:
     property-naming-strategy: SNAKE_CASE
   threads:
@@ -34,3 +38,7 @@ logging:
   structured:
     format:
       console: ecs
+
+hexpath:
+  search:
+    word-similarity-threshold: 0.5
