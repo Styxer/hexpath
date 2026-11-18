@@ -67,3 +67,43 @@ jobs:
             geo-service/target/surefire-reports/
             geo-service/target/failsafe-reports/
             geo-service/target/openapi-generated.yaml
+  e2e:
+    needs: java
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/download-artifact@v4
+        with:
+          name: geo-service-jar
+          path: jar
+      - name: start PostGIS
+        run: cp .env.example .env && docker compose up -d --wait
+      - run: pip install -e geo-pipeline -r e2e/requirements.txt
+      - name: publish the committed OpenStreetMap extract
+        run: |
+          set -a; . ./.env; set +a
+          python -m geopipeline migrate
+          python -m geopipeline run --source osm
+      - name: start the service
+        run: |
+          set -a; . ./.env; set +a
+          nohup java -jar jar/geo-service-*.jar > service.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf localhost:8080/actuator/health/readiness && exit 0; sleep 2; done
+          tail -50 service.log; exit 1
+      - name: end-to-end tests
+        run: |
+          set -a; . ./.env; set +a
+          pytest -q e2e
+      - name: pipeline reports and service log
+        if: always()
+        run: |
+          cat data/reports/*.md || true
+          tail -100 service.log || true
