@@ -64,3 +64,15 @@ def test_real_data_is_served(api):
     assert d["counts"]["place"] > 1000 and d["counts"]["address"] > 10000
     hebrew = api.get("/v1/places/search", params={"q": "קפה", **DIZENGOFF, "radius_m": 5000}).json()["results"]
     assert hebrew, "expected Hebrew-named places in central Tel Aviv"
+
+
+def test_metrics_named_in_the_runbook_exist(api):
+    text = api.get("/actuator/prometheus").text
+    for name in ("http_server_requests_seconds", "hexpath_dataset_age_seconds", "hexpath_snapshot_swaps_total",
+                 "hexpath_snapshot_load_seconds"):
+        assert name in text, name
+
+
+def test_swagger_ui_named_in_the_readme_is_served(api):
+    r = api.get("/swagger-ui.html")
+    assert r.status_code == 200 and "swagger" in r.text.lower()
