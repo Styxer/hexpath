@@ -11,7 +11,7 @@ class SchemaVersionCheckIT extends PostgisContainerSupport {
 
     @Test
     void startupFailsOnSchemaMismatch() throws Exception {
-        exec("owner", "UPDATE schema_version SET version = 2");
+        exec("owner", "UPDATE schema_version SET version = 3");
         try {
             // Command-line arguments outrank application.yml; builder .properties() would not.
             assertThatThrownBy(() -> new SpringApplicationBuilder(HexpathApplication.class)
@@ -20,9 +20,9 @@ class SchemaVersionCheckIT extends PostgisContainerSupport {
                             "--spring.datasource.password=reader-dev",
                             "--server.port=0")
                     .close())
-                    .hasStackTraceContaining("expected 3");
+                    .hasStackTraceContaining("expected 4");
         } finally {
-            exec("owner", "UPDATE schema_version SET version = 3");
+            exec("owner", "UPDATE schema_version SET version = 4");
         }
     }
 }

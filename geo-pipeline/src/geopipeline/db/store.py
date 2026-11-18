@@ -19,7 +19,7 @@ from ..reconcile import Baseline
 CHANNEL = "dataset_events"
 
 
-class NothingToRollBack(RuntimeError):
+class NothingToRollBack(RuntimeError):  # no ACTIVE release, or no RETIRED release with data left
     pass
 
 
@@ -70,7 +70,8 @@ class ReleaseStore:
     # ---- lookups -------------------------------------------------------------
     def find_by_hash(self, h: str) -> int | None:
         row = self.conn.execute(
-            "select id from dataset_release where input_hash = %s and status <> 'REJECTED'", (h,)).fetchone()
+            "select id from dataset_release where input_hash = %s"
+            " and status not in ('REJECTED', 'ROLLED_BACK', 'PURGED')", (h,)).fetchone()
         return row[0] if row else None
 
     def active_id(self) -> int | None:
@@ -139,8 +140,10 @@ class ReleaseStore:
     def rollback(self) -> int:
         with self.conn.transaction():
             current = self.active_id()
+            # Only a RETIRED release whose data still exists can be returned to.
             target = self.conn.execute(
                 "select id from dataset_release where status = 'RETIRED'"
+                " and to_regclass('place_r' || id) is not null"
                 " order by retired_at desc, id desc limit 1").fetchone()
             if current is None or target is None:
                 raise NothingToRollBack("no ACTIVE release, or no RETIRED release to return to")
@@ -158,6 +161,8 @@ class ReleaseStore:
                 "select retired_at < now() - %s, to_regclass(%s) is not null from dataset_release where id = %s",
                 (grace, f"place_r{rid}", rid)).fetchone()
             if old_enough and exists:
-                self.conn.execute("select hexpath_drop_partitions(%s)", (rid,))
+                with self.conn.transaction():
+                    self.conn.execute("select hexpath_drop_partitions(%s)", (rid,))
+                    self.conn.execute("update dataset_release set status = 'PURGED' where id = %s", (rid,))
                 dropped.append(rid)
         return dropped

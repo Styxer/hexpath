@@ -69,6 +69,7 @@ public abstract class PostgisContainerSupport {
     /** Return the database to the seed state: only release 1, ACTIVE, announced with an event. */
     public static void resetToSeed() throws SQLException {
         exec("owner", """
+                UPDATE dataset_release SET status = 'RETIRED' WHERE status = 'ACTIVE';
                 DO $$ DECLARE r bigint; BEGIN
                   FOR r IN SELECT id FROM dataset_release WHERE id <> 1 LOOP
                     PERFORM hexpath_drop_partitions(r);
@@ -87,5 +88,34 @@ public abstract class PostgisContainerSupport {
         registry.add("spring.datasource.url", PostgisContainerSupport::jdbcUrl);
         registry.add("spring.datasource.username", () -> "geo_reader");
         registry.add("spring.datasource.password", () -> "reader-dev");
+    }
+
+    /** Does what ReleaseStore.stage + publish do, as geo_writer, optionally without the NOTIFY. */
+    public static long publishSyntheticRelease(String hash, boolean notify) throws SQLException {
+        try (Connection c = connect("writer")) {
+            c.setAutoCommit(false);
+            long id;
+            try (var st = c.prepareStatement("""
+                    INSERT INTO dataset_release (input_hash, source, status, stats)
+                    VALUES (?, 'it', 'STAGED', '{"coverage": [34.765, 32.06, 34.795, 32.09], "counts": {}}')
+                    RETURNING id""")) {
+                st.setString(1, hash);
+                var rs = st.executeQuery();
+                rs.next();
+                id = rs.getLong(1);
+            }
+            try (var st = c.createStatement()) {
+                st.execute("SELECT hexpath_create_partitions(" + id + ")");
+                st.execute("UPDATE dataset_release SET status = 'RETIRED', retired_at = now() WHERE status = 'ACTIVE'");
+                st.execute("UPDATE dataset_release SET status = 'ACTIVE', published_at = now() WHERE id = " + id);
+                st.execute("INSERT INTO dataset_event (release_id, type, payload) VALUES (" + id
+                        + ", 'RELEASE_ACTIVATED', '{}')");
+                if (notify) {
+                    st.execute("SELECT pg_notify('dataset_events', '" + id + "')");
+                }
+            }
+            c.commit();
+            return id;
+        }
     }
 }

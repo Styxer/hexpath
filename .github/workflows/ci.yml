@@ -20,6 +20,15 @@ jobs:
       - name: database tests (Testcontainers, postgis/postgis:17-3.5)
         working-directory: geo-pipeline
         run: pytest -q -m db
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: demo page unit tests
+        run: node --test geo-service/src/test/js
   seed-drift:
     runs-on: ubuntu-latest
     steps:

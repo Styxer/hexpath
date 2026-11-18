@@ -77,6 +77,7 @@ def pg():
 @pytest.fixture
 def clean(pg):
     with connect(pg.owner) as c:
+        c.execute("update dataset_release set status = 'RETIRED' where status = 'ACTIVE'")  # the drop guard spares ACTIVE
         for (rid,) in c.execute("select id from dataset_release").fetchall():
             c.execute("select hexpath_drop_partitions(%s)", (rid,))
         c.execute("truncate dataset_release, dataset_event restart identity")

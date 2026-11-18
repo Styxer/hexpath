@@ -42,7 +42,7 @@ def _parser() -> argparse.ArgumentParser:
     pub = sub.add_parser("publish", help="activate a STAGED release")
     pub.add_argument("release_id", type=int)
     sub.add_parser("rollback", help="return to the previous release")
-    sub.add_parser("gc", help="drop partitions of old releases (keeps ACTIVE + 2 RETIRED)")
+    sub.add_parser("gc", help="drop partitions of old releases (keeps ACTIVE + 2 RETIRED); marks them PURGED")
     sub.add_parser("relay", help="forward pending outbox events (logging relay)")
     e = sub.add_parser("export-seed", help="write the Java test seed from the mini fixture")
     e.add_argument("--out", type=Path, default=Path("shared/seed/seed.sql"))
@@ -63,6 +63,8 @@ def _run(args) -> int:
     result = run_dataset(ds, _dsn("HEXPATH_WRITER_DSN"), override, publish=not args.no_publish)
     verb = "unchanged input, nothing to do:" if result.noop else "release"
     print(f"{verb} {result.release_id} {result.status} — report: {result.report_path}")
+    for reason in result.reasons:
+        print(f"  {'blocked' if result.status == 'REJECTED' else 'overridden'}: {reason}")
     return EXIT_REJECTED if result.status == "REJECTED" else EXIT_OK
 
 

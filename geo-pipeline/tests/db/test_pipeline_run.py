@@ -48,3 +48,18 @@ def test_wrong_zone_rejected_then_override(clean, reports):
 def test_no_publish_leaves_staged(clean, reports):
     r = run("fixture:mini", MINI_ZONES, clean.writer, None, publish=False)
     assert r.status == "STAGED"
+
+
+def test_rolled_back_bad_input_is_rejected_again_not_skipped(clean, reports):
+    from geopipeline.db.store import ReleaseStore
+    run("fixture:mini", MINI_ZONES, clean.writer, None)
+    run("fixture:mini", BAD_ZONES, clean.writer, Override("ofir", "drill", NOW))
+    ReleaseStore(connect(clean.writer)).rollback()
+    again = run("fixture:mini", BAD_ZONES, clean.writer, None)
+    assert again.status == "REJECTED" and not again.noop
+
+
+def test_rejected_run_carries_the_reasons(clean, reports):
+    run("fixture:mini", MINI_ZONES, clean.writer, None)
+    r = run("fixture:mini", BAD_ZONES, clean.writer, None)
+    assert any(x.startswith("boundary_area_change_pct zone-a") for x in r.reasons)

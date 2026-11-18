@@ -2,6 +2,11 @@ package dev.hexpath.geo.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import org.slf4j.LoggerFactory;
+
 import dev.hexpath.geo.dataset.DatasetSnapshot;
 import dev.hexpath.geo.dataset.SnapshotHolder;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -71,5 +76,24 @@ class RequestContextFilterTest {
         assertThat(res.getStatus()).isEqualTo(413);
         assertThat(res.getContentAsString()).contains("urn:hexpath:problem:payload-too-large");
         assertThat(chain.getRequest()).isNull();
+    }
+
+    @Test
+    void logsOneCompletionLineWithRequestAndRelease() throws Exception {
+        Logger logger = (Logger) LoggerFactory.getLogger(RequestContextFilter.class);
+        var appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            var req = new MockHttpServletRequest("GET", "/v1/dataset");
+            req.addHeader("X-Request-Id", "trace-me");
+            new RequestContextFilter(holder(SNAP)).doFilter(req, new MockHttpServletResponse(), new MockFilterChain());
+        } finally {
+            logger.detachAppender(appender);
+        }
+        assertThat(appender.list).hasSize(1);
+        ILoggingEvent e = appender.list.getFirst();
+        assertThat(e.getFormattedMessage()).contains("GET /v1/dataset").contains("200");
+        assertThat(e.getMDCPropertyMap()).containsEntry("requestId", "trace-me").containsEntry("datasetRelease", "7");
     }
 }

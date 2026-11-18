@@ -24,6 +24,7 @@ class RunResult:
     status: str
     report_path: Path
     noop: bool
+    reasons: tuple[str, ...] = ()
 
 
 def load_dataset(source: str, zones: Path) -> Dataset:
@@ -58,4 +59,5 @@ def run_dataset(ds: Dataset, writer_dsn: str, override: Override | None, publish
             if publish:
                 store.publish(rid)
                 status = "ACTIVE"
-        return RunResult(rid, status, write_report(rid, status, report), noop=False)
+        return RunResult(rid, status, write_report(rid, status, report), noop=False,
+                         reasons=tuple(decision.reasons))

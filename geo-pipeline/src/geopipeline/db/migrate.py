@@ -7,7 +7,7 @@ from pathlib import Path
 
 import psycopg
 
-EXPECTED_SCHEMA_VERSION = 3
+EXPECTED_SCHEMA_VERSION = 4
 _VERSION = re.compile(r"^V(\d+)__.+\.sql$")
 
 

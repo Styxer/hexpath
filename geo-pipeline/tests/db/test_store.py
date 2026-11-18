@@ -106,3 +106,33 @@ def test_rejected_then_same_input_can_stage(clean, store, mini_dataset):
     assert store.find_by_hash(input_hash(mini_dataset)) is None
     rid = store.stage(mini_dataset, {}, None)
     assert store.find_by_hash(input_hash(mini_dataset)) == rid
+
+
+def test_rollback_never_lands_on_a_purged_release(clean, store, mini_dataset):
+    r = []
+    for n in range(5):
+        r.append(store.stage(variant(mini_dataset, n), {}, None)); store.publish(r[-1])
+    with connect(clean.owner) as c:
+        c.execute("update dataset_release set retired_at = now() - interval '1 hour' where status = 'RETIRED'")
+    assert store.gc() == [r[0], r[1]]
+    assert status(clean, r[0]) == "PURGED" and status(clean, r[1]) == "PURGED"
+    assert store.rollback() == r[3]
+    assert store.rollback() == r[2]
+    with pytest.raises(NothingToRollBack):
+        store.rollback()                      # r2's data is gone; never activate an empty release
+
+
+def test_rolled_back_input_is_evaluated_again(clean, store, mini_dataset):
+    a = store.stage(mini_dataset, {}, None); store.publish(a)
+    bad = variant(mini_dataset, 1)
+    b = store.stage(bad, {}, None); store.publish(b)
+    store.rollback()
+    assert store.find_by_hash(input_hash(bad)) is None   # a rolled-back input goes through the gate again
+    assert store.stage(bad, {}, None) not in (a, b)
+
+
+def test_partitions_of_the_active_release_cannot_be_dropped(clean, store, mini_dataset):
+    a = store.stage(mini_dataset, {}, None); store.publish(a)
+    with pytest.raises(psycopg.errors.RaiseException):
+        connect(clean.writer).execute("select hexpath_drop_partitions(%s)", (a,))
+    assert partition_exists(clean, a)
