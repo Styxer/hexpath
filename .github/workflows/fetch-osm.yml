@@ -17,7 +17,16 @@ jobs:
       - run: python -m geopipeline fetch-osm --out data/osm/tel-aviv-center.json.gz
       - run: ls -l data/osm/
       - name: report what the pipeline would do with it
-        run: python -c "from geopipeline.pipeline import load_dataset; from geopipeline.validate import validate; from geopipeline.sources import SYNTHETIC_ZONES; ds = load_dataset('osm', SYNTHETIC_ZONES); print({k: len(getattr(ds, k)) for k in ('places','addresses','boundaries','nodes','edges')}, ds.dropped); [print(f) for f in validate(ds)]"
+        run: |
+          python - <<'EOF'
+          from geopipeline.pipeline import load_dataset
+          from geopipeline.sources import SYNTHETIC_ZONES
+          from geopipeline.validate import validate
+          ds = load_dataset("osm", SYNTHETIC_ZONES)
+          print({k: len(getattr(ds, k)) for k in ("places", "addresses", "boundaries", "nodes", "edges")}, ds.dropped)
+          for f in validate(ds):
+              print(f)
+          EOF
       - name: push to a review branch (merged by a person after review)
         run: |
           git config user.name "github-actions[bot]"
