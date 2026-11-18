@@ -15,3 +15,6 @@ jobs:
       - name: unit tests
         working-directory: geo-pipeline
         run: pytest -q -m "not db"
+      - name: database tests (Testcontainers, postgis/postgis:17-3.5)
+        working-directory: geo-pipeline
+        run: pytest -q -m db

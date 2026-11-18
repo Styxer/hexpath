@@ -7,7 +7,7 @@ INSERT INTO schema_version VALUES (0);
 
 CREATE TABLE dataset_release (
     id               bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    input_hash       text NOT NULL UNIQUE,
+    input_hash       text NOT NULL,
     source           text NOT NULL,
     source_timestamp timestamptz,
     created_at       timestamptz NOT NULL DEFAULT now(),
@@ -19,6 +19,10 @@ CREATE TABLE dataset_release (
     report           jsonb,
     override         jsonb
 );
+
+-- The same input may be rejected and later re-run (for example with an override),
+-- so uniqueness of the input hash excludes REJECTED rows.
+CREATE UNIQUE INDEX release_input_hash ON dataset_release (input_hash) WHERE status <> 'REJECTED';
 
 -- Exactly one ACTIVE release: every ACTIVE row indexes the same key (true).
 CREATE UNIQUE INDEX one_active ON dataset_release ((true)) WHERE status = 'ACTIVE';
