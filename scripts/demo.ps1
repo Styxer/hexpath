@@ -7,7 +7,7 @@ Get-Content .env | Where-Object { $_ -match '^\s*[^#].*=' } | ForEach-Object {
     [Environment]::SetEnvironmentVariable($name.Trim(), $value.Trim(), "Process")
 }
 docker compose up -d --wait
-if ($LASTEXITCODE -ne 0) { throw "docker compose failed — is Docker Desktop running?" }
+if ($LASTEXITCODE -ne 0) { throw "docker compose failed - is Docker Desktop running?" }
 if (-not (Test-Path .venv)) { python -m venv .venv }
 $py = ".venv\Scripts\python.exe"
 & $py -m pip install -q -e geo-pipeline
