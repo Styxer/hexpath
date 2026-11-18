@@ -36,6 +36,13 @@ management:
       expiry:
         http.server.requests: 5m
 
+springdoc:
+  api-docs:
+    version: openapi_3_0          # openapi-diff, used by the contract test, reads OpenAPI 3.0
+  override-with-generic-response: false
+  writer-with-order-by-keys: true # stable output, so the committed contract diffs cleanly
+  paths-to-match: /v1/**
+
 logging:
   structured:
     format:

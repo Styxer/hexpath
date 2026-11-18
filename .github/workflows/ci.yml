@@ -60,3 +60,4 @@ jobs:
           path: |
             geo-service/target/surefire-reports/
             geo-service/target/failsafe-reports/
+            geo-service/target/openapi-generated.yaml

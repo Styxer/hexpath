@@ -1,6 +1,7 @@
 package dev.hexpath.geo.corridor;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.Parameter;
 import dev.hexpath.geo.api.ApiProblemException;
 import dev.hexpath.geo.api.CoverageGuard;
 import dev.hexpath.geo.api.ProblemType;
@@ -54,8 +55,8 @@ public class CorridorController {
 
     @PostMapping("/v1/search/along-route")
     public AlongRouteResponse along(DatasetSnapshot snapshot, @RequestBody AlongRouteRequest body,
-                                    @RequestParam(required = false) String strategy,
-                                    @RequestParam(defaultValue = "false") boolean debug,
+                                    @Parameter(hidden = true) @RequestParam(required = false) String strategy,
+                                    @Parameter(hidden = true) @RequestParam(defaultValue = "false") boolean debug,
                                     HttpServletResponse response) {
         LineString route = RouteInput.parse(body.route());
         for (Coordinate c : route.getCoordinates()) {
