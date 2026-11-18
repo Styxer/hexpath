@@ -40,3 +40,17 @@ def bad_zones_dataset(mini_osm):
     from geopipeline.osm.transform import transform
 
     return transform(mini_osm, json.loads(BAD_ZONES.read_text()), COVERAGE)
+
+
+def baseline_of(ds, release_id=1):
+    """Test helper: the Baseline the release store would load for this dataset."""
+    from geopipeline.normalize import normalize
+    from geopipeline.reconcile import Baseline
+
+    return Baseline(
+        release_id=release_id,
+        counts={"place": len(ds.places), "address": len(ds.addresses),
+                "boundary": len(ds.boundaries), "road_edge": len(ds.edges)},
+        places={p.id: (p.lon, p.lat, normalize(p.name)) for p in ds.places},
+        boundary_areas={b.id: b.geom.area for b in ds.boundaries},
+    )
