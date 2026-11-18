@@ -1,6 +1,9 @@
 package dev.hexpath.geo.api;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import dev.hexpath.geo.dataset.DatasetSnapshot;
+import io.swagger.v3.core.jackson.ModelResolver;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -45,6 +48,15 @@ public class OpenApiConfig {
                                 + "Coordinates in responses are GeoJSON [lon, lat]; query parameters are lat and lon.")
                         .license(new License().name("MIT")))
                 .servers(List.of(new Server().url("/")));
+    }
+
+    /**
+     * The spec generator models schemas with its own (Jackson 2) mapper. Give it the same
+     * snake_case naming the API actually uses, or the contract would document nameHe for name_he.
+     */
+    @Bean
+    ModelResolver snakeCaseModelResolver() {
+        return new ModelResolver(Json.mapper().copy().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE));
     }
 
     @Bean
