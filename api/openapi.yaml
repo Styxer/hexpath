@@ -1,0 +1,776 @@
+openapi: 3.0.1
+info:
+  description: "Places, boundaries and route-aware search over the active dataset\
+    \ release. Coordinates in responses are GeoJSON [lon, lat]; query parameters are\
+    \ lat and lon."
+  license:
+    name: MIT
+  title: hexpath geo API
+  version: v1
+servers:
+- url: /
+paths:
+  /v1/boundaries/containing:
+    get:
+      operationId: containing
+      parameters:
+      - in: query
+        name: lat
+        required: true
+        schema:
+          type: number
+          format: double
+      - in: query
+        name: lon
+        required: true
+        schema:
+          type: number
+          format: double
+      - in: query
+        name: type
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ContainingResponse"
+          description: OK
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Invalid parameter (urn:hexpath:problem:invalid-parameter)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Not found (urn:hexpath:problem:not-found)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "422":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Outside coverage or route too long
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: No dataset release loaded yet (urn:hexpath:problem:service-not-ready)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+      tags:
+      - boundary-controller
+  /v1/dataset:
+    get:
+      operationId: dataset
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DatasetResponse"
+          description: OK
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Invalid parameter (urn:hexpath:problem:invalid-parameter)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Not found (urn:hexpath:problem:not-found)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "422":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Outside coverage or route too long
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: No dataset release loaded yet (urn:hexpath:problem:service-not-ready)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+      tags:
+      - dataset-controller
+  /v1/places/search:
+    get:
+      operationId: search
+      parameters:
+      - in: query
+        name: q
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: lat
+        required: false
+        schema:
+          type: number
+          format: double
+      - in: query
+        name: lon
+        required: false
+        schema:
+          type: number
+          format: double
+      - in: query
+        name: radius_m
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - in: query
+        name: category
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - in: query
+        name: cursor
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+          description: OK
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Invalid parameter (urn:hexpath:problem:invalid-parameter)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Not found (urn:hexpath:problem:not-found)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "422":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Outside coverage or route too long
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: No dataset release loaded yet (urn:hexpath:problem:service-not-ready)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+      tags:
+      - place-controller
+  /v1/places/{id}:
+    get:
+      operationId: place
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PlaceJson"
+          description: OK
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Invalid parameter (urn:hexpath:problem:invalid-parameter)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Not found (urn:hexpath:problem:not-found)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "422":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Outside coverage or route too long
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: No dataset release loaded yet (urn:hexpath:problem:service-not-ready)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+      tags:
+      - place-controller
+  /v1/search/along-route:
+    post:
+      operationId: along
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlongRouteRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AlongRouteResponse"
+          description: OK
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Invalid parameter (urn:hexpath:problem:invalid-parameter)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Not found (urn:hexpath:problem:not-found)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "413":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Request body over 256 KB (urn:hexpath:problem:payload-too-large)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "422":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Outside coverage or route too long
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: No dataset release loaded yet (urn:hexpath:problem:service-not-ready)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+      tags:
+      - corridor-controller
+  /v1/status:
+    get:
+      operationId: status
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+          description: OK
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Invalid parameter (urn:hexpath:problem:invalid-parameter)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Not found (urn:hexpath:problem:not-found)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "422":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Outside coverage or route too long
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: No dataset release loaded yet (urn:hexpath:problem:service-not-ready)
+          headers:
+            X-Dataset-Release:
+              description: Id of the dataset release that served the response
+              schema:
+                type: string
+            X-Request-Id:
+              description: Request id (echoed when the caller sends a safe one)
+              schema:
+                type: string
+      tags:
+      - status-controller
+components:
+  schemas:
+    AlongRouteRequest:
+      type: object
+      properties:
+        buffer_m:
+          type: number
+          format: double
+        category:
+          type: string
+        limit:
+          type: integer
+          format: int32
+        route:
+          $ref: "#/components/schemas/Route"
+    AlongRouteResponse:
+      type: object
+      properties:
+        debug:
+          $ref: "#/components/schemas/Debug"
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/CorridorJson"
+        strategy:
+          type: string
+    Boundary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        origin:
+          type: string
+        type:
+          type: string
+          enum:
+          - ADMIN
+          - REGULATORY
+    ContainingResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/Boundary"
+    CorridorJson:
+      type: object
+      properties:
+        along_m:
+          type: number
+          format: double
+        category:
+          type: string
+        distance_m:
+          type: number
+          format: double
+        id:
+          type: string
+        location:
+          $ref: "#/components/schemas/GeoPoint"
+        name:
+          type: string
+        name_en:
+          type: string
+        name_he:
+          type: string
+    DatasetResponse:
+      type: object
+      properties:
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        coverage:
+          type: array
+          items:
+            type: number
+            format: double
+        data_age_seconds:
+          type: integer
+          format: int64
+        published_at:
+          type: string
+          format: date-time
+        release:
+          type: integer
+          format: int64
+        source_timestamp:
+          type: string
+          format: date-time
+    Debug:
+      type: object
+      properties:
+        candidates:
+          type: integer
+          format: int32
+    EndpointStatus:
+      type: object
+      properties:
+        error_ratio_since_start:
+          type: number
+          format: double
+        p95_ms:
+          type: number
+          format: double
+        requests:
+          type: integer
+          format: int64
+    GeoPoint:
+      type: object
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: number
+            format: double
+        type:
+          type: string
+    PlaceJson:
+      type: object
+      properties:
+        category:
+          type: string
+        distance_m:
+          type: number
+          format: double
+        id:
+          type: string
+        location:
+          $ref: "#/components/schemas/GeoPoint"
+        name:
+          type: string
+        name_en:
+          type: string
+        name_he:
+          type: string
+        score:
+          type: number
+          format: double
+    Problem:
+      type: object
+      properties:
+        detail:
+          type: string
+        instance:
+          type: string
+        status:
+          type: integer
+          format: int32
+        title:
+          type: string
+        type:
+          type: string
+          example: urn:hexpath:problem:invalid-parameter
+    Route:
+      type: object
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+              format: double
+        type:
+          type: string
+    SearchResponse:
+      type: object
+      properties:
+        next_cursor:
+          type: string
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlaceJson"
+    StatusResponse:
+      type: object
+      properties:
+        data_age_seconds:
+          type: integer
+          format: int64
+        endpoints:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/EndpointStatus"
+        note:
+          type: string
+        release:
+          type: integer
+          format: int64
