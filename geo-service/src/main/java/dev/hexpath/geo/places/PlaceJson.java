@@ -9,7 +9,7 @@ public record PlaceJson(String id, String name, String nameHe, String nameEn, St
                         Double score, Double distanceM) {
 
     public record GeoPoint(String type, List<Double> coordinates) {
-        static GeoPoint of(double lat, double lon) {
+        public static GeoPoint of(double lat, double lon) {
             return new GeoPoint("Point", List.of(lon, lat));
         }
     }

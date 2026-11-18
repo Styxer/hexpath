@@ -44,3 +44,6 @@ logging:
 hexpath:
   search:
     word-similarity-threshold: 0.5
+  corridor:
+    # postgis | h3. Decided by the benchmark recorded in docs/adr/0003-corridor-search.md.
+    default-strategy: postgis
