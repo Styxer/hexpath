@@ -76,6 +76,7 @@ def main(argv=None) -> int:
     from .db.lock import PipelineBusy
     from .db.migrate import SchemaMismatch
     from .db.store import NothingToRollBack
+    from .osm.fetch import FetchError
     from .sources import InputError
 
     try:
@@ -115,7 +116,7 @@ def main(argv=None) -> int:
                         raise UsageError(f"no release {args.release_id}")
                     print(to_markdown(args.release_id, row[0], row[1]))
         return EXIT_OK
-    except (UsageError, InputError, NothingToRollBack, ValueError) as e:
+    except (UsageError, InputError, NothingToRollBack, ValueError, FetchError) as e:
         print(f"error: {e}", file=sys.stderr)
         return EXIT_USAGE
     except PipelineBusy as e:
