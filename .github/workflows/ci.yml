@@ -46,6 +46,12 @@ jobs:
           cache: maven
       - name: mvn verify (unit + Testcontainers integration tests)
         run: mvn -B -ntp -f geo-service/pom.xml verify
+      - name: print generated OpenAPI contract (for review when the contract test fails)
+        if: failure() && matrix.java == '21'
+        run: |
+          echo "----- BEGIN openapi-generated.yaml -----"
+          cat geo-service/target/openapi-generated.yaml || true
+          echo "----- END openapi-generated.yaml -----"
       - name: upload service jar
         if: matrix.java == '21'
         uses: actions/upload-artifact@v4
