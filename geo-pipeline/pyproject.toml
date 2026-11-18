@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geopipeline"
+version = "0.1.0"
+description = "Release-gated OpenStreetMap pipeline for hexpath"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+  "psycopg[binary]>=3.2",
+  "shapely>=2.0",
+  "h3>=4.1,<5",
+  "osm2geojson>=0.2.5",
+  "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "testcontainers[postgres]>=4.8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["db: needs a PostGIS database (Testcontainers, or HEXPATH_TEST_ADMIN_DSN)"]

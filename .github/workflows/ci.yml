@@ -3,7 +3,15 @@ on:
   push:
   pull_request:
 jobs:
-  hello:
+  python:
     runs-on: ubuntu-latest
     steps:
-      - run: echo ok
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e "geo-pipeline[test]"
+      - name: unit tests
+        working-directory: geo-pipeline
+        run: pytest -q -m "not db"
