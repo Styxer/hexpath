@@ -40,6 +40,7 @@ springdoc:
   api-docs:
     version: openapi_3_0          # openapi-diff, used by the contract test, reads OpenAPI 3.0
   override-with-generic-response: false
+  default-produces-media-type: application/json
   writer-with-order-by-keys: true # stable output, so the committed contract diffs cleanly
   paths-to-match: /v1/**
 

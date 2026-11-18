@@ -3,6 +3,7 @@
 HEXPATH_BASE_URL   service URL (default http://localhost:8080)
 HEXPATH_WRITER_DSN pipeline database DSN (for the release lifecycle drill)
 """
+import json
 import os
 import subprocess
 import sys
@@ -11,7 +12,7 @@ from pathlib import Path
 
 import pytest
 import requests
-from openapi_core import OpenAPI
+from openapi_core import Config, OpenAPI
 
 REPO = Path(__file__).resolve().parents[1]
 BASE = os.environ.get("HEXPATH_BASE_URL", "http://localhost:8080")
@@ -39,7 +40,9 @@ def api():
 
 @pytest.fixture(scope="session")
 def spec():
-    return OpenAPI.from_file_path(str(REPO / "api" / "openapi.yaml"))
+    # RFC 9457 problem bodies are JSON with their own media type.
+    config = Config(extra_media_type_deserializers={"application/problem+json": json.loads})
+    return OpenAPI.from_file_path(str(REPO / "api" / "openapi.yaml"), config=config)
 
 
 @pytest.fixture(scope="session")
