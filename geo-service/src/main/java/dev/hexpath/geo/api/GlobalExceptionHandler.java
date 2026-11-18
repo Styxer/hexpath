@@ -33,9 +33,7 @@ public class GlobalExceptionHandler {
     }
 
     /** Spring MVC's own errors (unknown path, missing parameter, wrong method, ...). */
-    @ExceptionHandler(ErrorResponse.class)
-    ResponseEntity<ProblemDetail> framework(Exception e, HttpServletRequest req) {
-        ErrorResponse er = (ErrorResponse) e;
+    private ResponseEntity<ProblemDetail> framework(ErrorResponse er, HttpServletRequest req) {
         HttpStatusCode status = er.getStatusCode();
         if (status.value() == 404) {
             return problem(ProblemType.NOT_FOUND, "no such resource: " + req.getRequestURI(), req);
@@ -50,6 +48,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<ProblemDetail> unexpected(Exception e, HttpServletRequest req) {
+        if (e instanceof ErrorResponse er) {   // ErrorResponse is an interface, so it cannot be a handler type
+            return framework(er, req);
+        }
         log.error("unhandled error on {}", req.getRequestURI(), e);
         ProblemDetail p = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                 "unexpected error; quote the X-Request-Id header when reporting it");
