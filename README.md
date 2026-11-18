@@ -46,7 +46,8 @@ The full contract is [`api/openapi.yaml`](api/openapi.yaml); Swagger UI runs at 
 
 ```bash
 python -m geopipeline run --source osm --zones data/fixtures/bad/zones-wrong-extent.geojson
-#   release N REJECTED  (boundary_area_change_pct zone-a 800.0% > 20.0%), exit code 3
+#   release N REJECTED — report: data/reports/release-N.json
+#     blocked: boundary_area_change_pct zone-a 800.0% > 20.0%        (exit code 3)
 python -m geopipeline run --source osm --zones data/fixtures/bad/zones-wrong-extent.geojson \
   --override --reason "demo"
 #   now live; the map's release badge changes within seconds
@@ -96,8 +97,10 @@ Start with [docs/architecture.md](docs/architecture.md). Decisions:
 
 ## How this was built
 
-Built with AI assistance (Claude), in a plan-then-test-first workflow; every behaviour has a test that
-was seen failing before the code was written. `AStarRoutingEngine` (phase 2) is written by Ofir.
+Built with AI assistance (Claude), in a plan-then-test-first workflow: tests were written before the code
+and, almost always, seen failing first; the exceptions are recorded in the build log. An independent
+review of the whole branch followed, and its findings were fixed with tests that reproduce them.
+`AStarRoutingEngine` (phase 2) is written by Ofir.
 
 ## Data and licence
 

@@ -10,7 +10,10 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -35,6 +38,7 @@ public class RequestContextFilter extends OncePerRequestFilter {
     static final long MAX_BODY_BYTES = 256 * 1024;
     private static final Pattern SAFE_ID = Pattern.compile("[A-Za-z0-9-]{1,64}");
 
+    private static final Logger log = LoggerFactory.getLogger(RequestContextFilter.class);
     private final SnapshotHolder holder;
 
     public RequestContextFilter(SnapshotHolder holder) {
@@ -49,6 +53,7 @@ public class RequestContextFilter extends OncePerRequestFilter {
         Optional<DatasetSnapshot> snapshot = holder.current();
         res.setHeader(REQUEST_ID, requestId);
         MDC.put("requestId", requestId);
+        long start = System.nanoTime();
         snapshot.ifPresent(s -> {
             req.setAttribute(SNAPSHOT_ATTRIBUTE, s);
             res.setHeader(DATASET_RELEASE, Long.toString(s.releaseId()));
@@ -64,6 +69,10 @@ public class RequestContextFilter extends OncePerRequestFilter {
                 chain.doFilter(req, res);
             }
         } finally {
+            // One line per request, while requestId and datasetRelease are still in the MDC.
+            Object pattern = req.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+            log.info("{} {} -> {} in {} ms", req.getMethod(), pattern != null ? pattern : req.getRequestURI(),
+                    res.getStatus(), String.format(java.util.Locale.ROOT, "%.1f", (System.nanoTime() - start) / 1e6));
             MDC.remove("requestId");
             MDC.remove("datasetRelease");
         }

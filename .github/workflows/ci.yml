@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: "22"
       - name: demo page unit tests
-        run: node --test geo-service/src/test/js
+        run: node --test geo-service/src/test/js/*.test.mjs
   seed-drift:
     runs-on: ubuntu-latest
     steps:

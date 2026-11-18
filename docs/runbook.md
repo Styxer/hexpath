@@ -8,7 +8,8 @@ Commands assume the repository root, the variables from `.env` loaded, and the p
 Every API response carries two headers:
 
 - `X-Dataset-Release`: the release that answered.
-- `X-Request-Id`: quote it in any report; it is in every log line of that request.
+- `X-Request-Id`: quote it in any report. Every request writes one log line
+  (`GET /v1/places/search -> 200 in 4.2 ms`) carrying `requestId` and `datasetRelease`.
 
 ```
 curl -si localhost:8080/v1/dataset          # release, source data age, counts
@@ -30,15 +31,17 @@ Symptoms: a consuming team reports a wrong boundary, a missing place or a moved 
    ```
    python -m geopipeline rollback
    ```
-   This makes the newest `RETIRED` release `ACTIVE` and marks the bad one `ROLLED_BACK`, in one
-   transaction with an outbox event.
+   This makes the newest `RETIRED` release that still has its data `ACTIVE`, and marks the bad one
+   `ROLLED_BACK`, in one transaction with an outbox event. Re-running the rolled-back input later sends
+   it through the gate again; it is not skipped as "already done".
 4. Verify: `X-Dataset-Release` changes within about a second (NOTIFY), at most 10 seconds (poll).
    `hexpath_snapshot_swaps_total` goes up by one.
 5. Fix the input, re-run the pipeline, and write the postmortem
    ([example](postmortem-example.md)).
 
 Rollback fails with `error: no ACTIVE release, or no RETIRED release to return to` when there is
-nothing to return to; publish a corrected release instead.
+nothing to return to, including when the older releases were already `PURGED` by `gc`. Publish a
+corrected release instead.
 
 ## 2. The pipeline rejected a release (exit code 3)
 
@@ -60,7 +63,8 @@ nothing to return to; publish a corrected release instead.
 2. Check the database first: connections, CPU, and whether a pipeline run is loading at the same time.
 3. Check the plan: the spatial index guard (`SpatialIndexGuardIT`) proves each query *can* use its index.
    Run the query with `EXPLAIN (ANALYZE, BUFFERS)` against the active partition to see whether it *does*.
-4. If retired partitions have piled up, run `python -m geopipeline gc`.
+4. If retired partitions have piled up, run `python -m geopipeline gc`. It drops the data of releases
+   beyond the two newest retired ones (never within 10 minutes of retirement) and marks them `PURGED`.
 5. Compare with the measured baseline in [ADR 0003](adr/0003-corridor-search.md) and the targets in
    [slo.md](slo.md).
 
@@ -74,7 +78,8 @@ Symptoms: the pipeline printed `release N ACTIVE` but `X-Dataset-Release` still 
    psql -h localhost -p 55432 -U geo_reader -d hexpath -c "select id, status from dataset_release where status = 'ACTIVE'"
    ```
 2. Look in the service log for `dataset listener connection failed, retrying in … ms`. The listener
-   reconnects with backoff up to 30 seconds; the 10-second poll runs on that same connection.
+   retries with backoff up to 30 seconds after a lost connection or a failed snapshot load; the
+   10-second poll runs on that same connection.
 3. `hexpath_snapshot_load_seconds` errors or a stuck `hexpath_snapshot_swaps_total` point at the loader.
 4. If it does not recover, restart the service. Readiness stays DOWN until the snapshot is loaded.
 
@@ -95,7 +100,7 @@ Symptoms: the pipeline printed `release N ACTIVE` but `X-Dataset-Release` still 
 | 5 | Database schema version mismatch | `python -m geopipeline migrate` |
 
 The service refuses to start on a schema mismatch with
-`schema version X, expected 3 — run: python -m geopipeline migrate`.
+`schema version X, expected 4 — run: python -m geopipeline migrate`.
 
 ## 7. Refreshing the OpenStreetMap extract
 

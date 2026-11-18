@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchemaVersionCheck implements ApplicationRunner {
 
-    public static final int EXPECTED_SCHEMA_VERSION = 3;
+    public static final int EXPECTED_SCHEMA_VERSION = 4;
     private final JdbcTemplate jdbc;
 
     public SchemaVersionCheck(JdbcTemplate jdbc) {

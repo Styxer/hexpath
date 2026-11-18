@@ -64,7 +64,7 @@ public class DatasetEventListener implements SmartLifecycle {
     private void loop() {
         long backoff = 1_000;
         while (running) {
-            try (Connection c = DriverManager.getConnection(url, user, password)) {
+            try (Connection c = DriverManager.getConnection(url, listenerProperties())) {
                 try (Statement s = c.createStatement()) {
                     s.execute("LISTEN dataset_events");
                 }
@@ -75,7 +75,9 @@ public class DatasetEventListener implements SmartLifecycle {
                     pg.getNotifications(POLL_MILLIS);
                     refreshIfNeeded(c);
                 }
-            } catch (SQLException e) {
+            } catch (SQLException | RuntimeException e) {
+                // RuntimeException covers Spring's DataAccessException from the loader (pool exhausted,
+                // transient query error): the thread must survive it, or the service stops following releases.
                 if (!running) {
                     return;
                 }
@@ -88,6 +90,16 @@ public class DatasetEventListener implements SmartLifecycle {
                 backoff = Math.min(backoff * 2, MAX_BACKOFF_MILLIS);
             }
         }
+    }
+
+    /** Keepalive and a socket timeout above the poll interval, so a half-open connection cannot hang the poll. */
+    private java.util.Properties listenerProperties() {
+        var p = new java.util.Properties();
+        p.setProperty("user", user);
+        p.setProperty("password", password);
+        p.setProperty("tcpKeepAlive", "true");
+        p.setProperty("socketTimeout", Integer.toString(POLL_MILLIS / 1000 * 3));
+        return p;
     }
 
     private void refreshIfNeeded(Connection c) throws SQLException {

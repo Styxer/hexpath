@@ -1,6 +1,6 @@
 name: fetch-osm
-# Refreshes the committed OpenStreetMap extract. Data changes arrive as a PR,
-# so they are reviewed like code (governed change, no manual edits to data).
+# Refreshes the committed OpenStreetMap extract. The result is pushed to the branch data/osm-refresh
+# and merged by a person after review, so data changes are reviewed like code (governed change).
 on:
   workflow_dispatch:
 permissions:

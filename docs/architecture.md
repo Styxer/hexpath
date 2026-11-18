@@ -44,7 +44,8 @@ answers geo queries over whichever release is active.
 ## Data model
 
 - `dataset_release`: one row per candidate release, with status `STAGED`, `ACTIVE`, `RETIRED`,
-  `REJECTED` or `ROLLED_BACK`. A partial unique index allows exactly one `ACTIVE` row.
+  `REJECTED`, `ROLLED_BACK` or `PURGED` (data dropped by `gc`). A partial unique index allows exactly
+  one `ACTIVE` row.
 - `place`, `address`, `boundary`, `road_node`, `road_edge`: LIST-partitioned by `release_id`, one
   partition per release (`place_r42`, ...). Every query filters on one `release_id`, so PostgreSQL reads
   one partition. Dropping an old release is `DROP TABLE`, not a large `DELETE`.

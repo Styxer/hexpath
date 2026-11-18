@@ -1,4 +1,6 @@
 // Demo page for the hexpath API. Plain ES module, no build step.
+import { escapeHtml, label, placePopup } from "./html.js";
+
 const L = window.L;
 const center = [32.0779, 34.7740];
 const map = L.map("map", { doubleClickZoom: false }).setView(center, 15);
@@ -49,10 +51,6 @@ function numberIcon(n) {
   return L.divIcon({ className: "", html: `<span class="num">${n}</span>`, iconSize: [20, 20], iconAnchor: [10, 10] });
 }
 
-function label(p) {
-  return p.name_en && p.name_en !== p.name ? `${p.name} (${p.name_en})` : p.name;
-}
-
 // ---- place search -------------------------------------------------------------------------
 let searchTimer;
 $("q").addEventListener("input", () => {
@@ -70,7 +68,7 @@ async function search() {
   const body = await api(`/v1/places/search?${params}`);
   for (const p of body.results) {
     const [lon, lat] = p.location.coordinates;
-    L.marker([lat, lon]).bindPopup(`${label(p)}<br><span class="muted">${p.category}</span>`).addTo(searchLayer);
+    L.marker([lat, lon]).bindPopup(placePopup(p)).addTo(searchLayer);
     const li = document.createElement("li");
     li.textContent = `${label(p)} · ${p.category} · ${Math.round(p.distance_m)} m`;
     li.onclick = () => map.setView([lat, lon], 17);
@@ -155,7 +153,7 @@ $("along").onclick = async () => {
   ordered.forEach((p, i) => {
     const [lon, lat] = p.location.coordinates;
     L.marker([lat, lon], { icon: numberIcon(i + 1) })
-      .bindPopup(`${label(p)}<br><span class="muted">${p.category} · ${Math.round(p.distance_m)} m off the route</span>`)
+      .bindPopup(placePopup(p, `${p.category} · ${Math.round(p.distance_m)} m off the route`))
       .addTo(alongLayer);
     const li = document.createElement("li");
     li.textContent = `${label(p)} · ${(p.along_m / 1000).toFixed(2)} km along, ${Math.round(p.distance_m)} m off`;
@@ -175,7 +173,8 @@ map.on("contextmenu", async (e) => {
     $("boundaries").append(li);
   }
   if (!body.results.length) $("boundaries").innerHTML = "<li class='muted'>None</li>";
-  L.popup().setLatLng(e.latlng).setContent(body.results.map((b) => b.name).join("<br>") || "No boundary").openOn(map);
+  L.popup().setLatLng(e.latlng)
+    .setContent(body.results.map((b) => escapeHtml(b.name)).join("<br>") || "No boundary").openOn(map);
 });
 
 refreshDataset().catch(() => {});

@@ -20,7 +20,9 @@ without a restart. Old data must not slow down queries over new data.
    missed.
 4. **Retention:** the active release plus the two newest retired ones keep their partitions.
    `geopipeline gc` drops older ones, but never a release retired in the last 10 minutes, so a service
-   still pinned to it has time to swap first.
+   still pinned to it has time to swap first. A dropped release becomes `PURGED`: rollback only returns
+   to releases whose data still exists, and the database refuses to drop the `ACTIVE` release's data.
+   `REJECTED`, `ROLLED_BACK` and `PURGED` inputs are evaluated again if they are re-run.
 
 ## Alternatives
 

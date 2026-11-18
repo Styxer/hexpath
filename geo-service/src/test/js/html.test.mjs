@@ -1,4 +1,4 @@
-// Run with: node --test geo-service/src/test/js
+// Run with: node --test geo-service/src/test/js/*.test.mjs
 import assert from "node:assert/strict";
 import test from "node:test";
 import { escapeHtml, placePopup } from "../../main/resources/static/html.js";
