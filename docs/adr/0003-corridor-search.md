@@ -29,9 +29,13 @@ The question was which one the endpoint should use by default, decided by measur
 - Run: 2026-11-18.
 
 | buffer (m) | strategy | p50 (ms) | p95 (ms) | mean candidates | mean results | identical results |
+|---:|---|---:|---:|---:|---:|---:|
 | 100 | postgis | 2.6 | 5.11 | 65.4 | 61.4 | 100.0% |
+| 100 | h3 | 15.7 | 22.8 | 943.5 | 61.4 | 100.0% |
 | 300 | postgis | 4.5 | 8.01 | 210.4 | 97.7 | 100.0% |
+| 300 | h3 | 20.65 | 28.12 | 1131.3 | 97.7 | 100.0% |
 | 1000 | postgis | 12.0 | 17.61 | 799.7 | 100 | 100.0% |
+| 1000 | h3 | 52.7 | 64.7 | 1334 | 100 | 100.0% |
 
 ## Decision
 
