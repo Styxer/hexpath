@@ -25,7 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *   <li>rejects API calls while no release is loaded, and bodies over 256 KB.</li>
  * </ol>
  */
-@Component
+@Component("hexpathRequestContextFilter")  // "requestContextFilter" is taken by Spring MVC
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RequestContextFilter extends OncePerRequestFilter {
 
